@@ -1,12 +1,17 @@
-use num::traits::{CheckedAdd, CheckedSub};
+use num::traits::{CheckedAdd, CheckedSub, Zero};
+use std::cmp::Eq;
 use std::collections::HashMap;
+use std::hash::Hash;
 
-pub struct BalancesModule
+pub struct BalancesModule<AccountId, Balance>
 {
-    balances: HashMap<u32, u32>,
+    balances: HashMap<AccountId, Balance>,
 }
 
-impl BalancesModule
+impl<AccountId, Balance> BalancesModule<AccountId, Balance>
+where
+    AccountId: Eq + Hash,
+    Balance: CheckedAdd + CheckedSub + Copy + Zero,
 {
     pub fn new() -> Self
     {
@@ -15,24 +20,30 @@ impl BalancesModule
         }
     }
 
-    pub fn balance(&self, who: u32) -> u32
+    pub fn balance(&self, who: AccountId) -> Balance
     {
-        *self.balances.get(&who).unwrap_or(&0)
+        *self.balances.get(&who).unwrap_or(&Zero::zero())
     }
 
-    pub fn set_balance(&mut self, who: u32, amount: u32)
+    pub fn set_balance(&mut self, who: AccountId, amount: Balance)
     {
         self.balances.insert(who, amount);
     }
 
-    pub fn transfer(&mut self, from: u32, to: u32, amount: u32) -> Result<(), &'static str>
+    pub fn transfer(
+        &mut self,
+        from: AccountId,
+        to: AccountId,
+        amount: Balance,
+    ) -> Result<(), &'static str>
     {
         let from_balance = self
             .balances
             .get(&from)
             .ok_or("From Account does not exist")?;
 
-        let to_balance = self.balances.get(&to).unwrap_or(&0);
+        let zero = Zero::zero();
+        let to_balance = self.balances.get(&to).unwrap_or(&zero);
 
         let new_from_balance = from_balance
             .checked_sub(&amount)

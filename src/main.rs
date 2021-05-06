@@ -2,61 +2,69 @@ mod balances;
 
 fn main() {}
 
-#[test]
-fn test_set_balance()
+#[cfg(test)]
+mod test
 {
-    let alice = 1;
+    use crate::balances;
+    type AccountId = u32;
+    type Balance = u32;
 
-    let mut bals = balances::BalancesModule::new();
-    assert_eq!(bals.balance(alice), 0);
+    #[test]
+    fn test_set_balance()
+    {
+        let alice = 1;
 
-    bals.set_balance(alice, 10);
-    assert_eq!(bals.balance(alice), 10);
-}
+        let mut bals = balances::BalancesModule::<AccountId, Balance>::new();
+        assert_eq!(bals.balance(alice), 0);
 
-#[test]
-fn test_transfer()
-{
-    let alice = 1;
-    let bob = 2;
+        bals.set_balance(alice, 10);
+        assert_eq!(bals.balance(alice), 10);
+    }
 
-    let mut bals = balances::BalancesModule::new();
+    #[test]
+    fn test_transfer()
+    {
+        let alice = 1;
+        let bob = 2;
 
-    bals.set_balance(alice, 10);
+        let mut bals = balances::BalancesModule::<AccountId, Balance>::new();
 
-    bals.transfer(alice, bob, 5).expect("Transfer Failed");
+        bals.set_balance(alice, 10);
 
-    assert_eq!(bals.balance(bob), 5);
-}
+        bals.transfer(alice, bob, 5).expect("Transfer Failed");
 
-// 2 ways to test for Errors::
-#[test]
-fn test_transfer_fails_when_from_user_not_exists_1()
-{
-    let alice = 1;
-    let bob = 2;
+        assert_eq!(bals.balance(bob), 5);
+    }
 
-    let mut bals = balances::BalancesModule::new();
+    // 2 ways to test for Errors::
+    #[test]
+    fn test_transfer_fails_when_from_user_not_exists_1()
+    {
+        let alice = 1;
+        let bob = 2;
 
-    match bals.transfer(alice, bob, 5) {
-        Err(msg) => {
-            assert_eq!(msg, "From Account does not exist");
-        }
-        _ => {
-            panic!("Transfer didn't fail as expected");
+        let mut bals = balances::BalancesModule::<AccountId, Balance>::new();
+
+        match bals.transfer(alice, bob, 5) {
+            Err(msg) => {
+                assert_eq!(msg, "From Account does not exist");
+            }
+            _ => {
+                panic!("Transfer didn't fail as expected");
+            }
         }
     }
-}
 
-#[test]
-fn test_transfer_fails_when_from_user_not_exists_2()
-{
-    let alice = 1;
-    let bob = 2;
+    #[test]
+    fn test_transfer_fails_when_from_user_not_exists_2()
+    {
+        let alice = 1;
+        let bob = 2;
 
-    let mut bals = balances::BalancesModule::new();
+        let mut bals = balances::BalancesModule::<AccountId, Balance>::new();
 
-    let res = bals.transfer(alice, bob, 5).unwrap_err();
+        let res = bals.transfer(alice, bob, 5).unwrap_err();
 
-    assert_eq!(res, "From Account does not exist");
+        assert_eq!(res, "From Account does not exist");
+    }
 }
