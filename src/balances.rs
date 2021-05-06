@@ -3,19 +3,25 @@ use std::cmp::Eq;
 use std::collections::HashMap;
 use std::hash::Hash;
 
-pub struct BalancesModule<AccountId, Balance>
+// the Config trait here is a wrapper around required types
+// so that we don't have to create a long list of types
+// required in our impl of the Balances Module
+pub trait Config
 {
-    balances: HashMap<AccountId, Balance>,
+    type AccountId: Eq + Hash;
+    type Balance: Zero + CheckedAdd + CheckedSub + Copy;
+}
+
+pub struct BalancesModule<C: Config>
+{
+    balances: HashMap<C::AccountId, C::Balance>,
 }
 
 // this impl is using functions necessary for Hashing - insert, get, etc.
 // so we have to use Generic Bounds to constrain this impl to those
 // types that have the Traits necessary for those functions:
 // https://doc.rust-lang.org/rust-by-example/generics/bounds.html
-impl<AccountId, Balance> BalancesModule<AccountId, Balance>
-where
-    AccountId: Eq + Hash,
-    Balance: CheckedAdd + CheckedSub + Copy + Zero,
+impl<C: Config> BalancesModule<C>
 {
     pub fn new() -> Self
     {
@@ -24,21 +30,21 @@ where
         }
     }
 
-    pub fn balance(&self, who: AccountId) -> Balance
+    pub fn balance(&self, who: C::AccountId) -> C::Balance
     {
         *self.balances.get(&who).unwrap_or(&Zero::zero())
     }
 
-    pub fn set_balance(&mut self, who: AccountId, amount: Balance)
+    pub fn set_balance(&mut self, who: C::AccountId, amount: C::Balance)
     {
         self.balances.insert(who, amount);
     }
 
     pub fn transfer(
         &mut self,
-        from: AccountId,
-        to: AccountId,
-        amount: Balance,
+        from: C::AccountId,
+        to: C::AccountId,
+        amount: C::Balance,
     ) -> Result<(), &'static str>
     {
         let from_balance = self

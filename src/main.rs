@@ -6,15 +6,23 @@ fn main() {}
 mod test
 {
     use crate::balances;
-    type AccountId = u32;
-    type Balance = u32;
+    use crate::balances::Config;
+
+    struct Runtime;
+
+    // must impl the Config required by the balances module
+    impl Config for Runtime
+    {
+        type AccountId = u32;
+        type Balance = u32;
+    }
 
     #[test]
     fn test_set_balance()
     {
         let alice = 1;
 
-        let mut bals = balances::BalancesModule::<AccountId, Balance>::new();
+        let mut bals = balances::BalancesModule::<Runtime>::new();
         assert_eq!(bals.balance(alice), 0);
 
         bals.set_balance(alice, 10);
@@ -27,7 +35,7 @@ mod test
         let alice = 1;
         let bob = 2;
 
-        let mut bals = balances::BalancesModule::<AccountId, Balance>::new();
+        let mut bals = balances::BalancesModule::<Runtime>::new();
 
         bals.set_balance(alice, 10);
 
@@ -43,7 +51,7 @@ mod test
         let alice = 1;
         let bob = 2;
 
-        let mut bals = balances::BalancesModule::<AccountId, Balance>::new();
+        let mut bals = balances::BalancesModule::<Runtime>::new();
 
         match bals.transfer(alice, bob, 5) {
             Err(msg) => {
@@ -61,7 +69,7 @@ mod test
         let alice = 1;
         let bob = 2;
 
-        let mut bals = balances::BalancesModule::<AccountId, Balance>::new();
+        let mut bals = balances::BalancesModule::<Runtime>::new();
 
         let res = bals.transfer(alice, bob, 5).unwrap_err();
 
