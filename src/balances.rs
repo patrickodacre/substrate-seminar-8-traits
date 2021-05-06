@@ -8,6 +8,10 @@ pub struct BalancesModule<AccountId, Balance>
     balances: HashMap<AccountId, Balance>,
 }
 
+// this impl is using functions necessary for Hashing - insert, get, etc.
+// so we have to use Generic Bounds to constrain this impl to those
+// types that have the Traits necessary for those functions:
+// https://doc.rust-lang.org/rust-by-example/generics/bounds.html
 impl<AccountId, Balance> BalancesModule<AccountId, Balance>
 where
     AccountId: Eq + Hash,
