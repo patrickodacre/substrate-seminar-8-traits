@@ -27,7 +27,11 @@ impl BalancesModule
 
     pub fn transfer(&mut self, from: u32, to: u32, amount: u32) -> Result<(), &'static str>
     {
-        let from_balance = self.balances.get(&from).unwrap_or(&0);
+        let from_balance = self
+            .balances
+            .get(&from)
+            .ok_or("From Account does not exist")?;
+
         let to_balance = self.balances.get(&to).unwrap_or(&0);
 
         let new_from_balance = from_balance

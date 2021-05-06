@@ -28,3 +28,35 @@ fn test_transfer()
 
     assert_eq!(bals.balance(bob), 5);
 }
+
+// 2 ways to test for Errors::
+#[test]
+fn test_transfer_fails_when_from_user_not_exists_1()
+{
+    let alice = 1;
+    let bob = 2;
+
+    let mut bals = balances::BalancesModule::new();
+
+    match bals.transfer(alice, bob, 5) {
+        Err(msg) => {
+            assert_eq!(msg, "From Account does not exist");
+        }
+        _ => {
+            panic!("Transfer didn't fail as expected");
+        }
+    }
+}
+
+#[test]
+fn test_transfer_fails_when_from_user_not_exists_2()
+{
+    let alice = 1;
+    let bob = 2;
+
+    let mut bals = balances::BalancesModule::new();
+
+    let res = bals.transfer(alice, bob, 5).unwrap_err();
+
+    assert_eq!(res, "From Account does not exist");
+}
